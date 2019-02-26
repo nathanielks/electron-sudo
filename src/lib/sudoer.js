@@ -389,7 +389,7 @@ class SudoerWin32 extends Sudoer {
 
     constructor(options = {}) {
         super(options);
-        this.bundled = require('path').resolve(__dirname, 'src\\bin\\elevate.exe');
+        this.bundled = require('path').resolve(__dirname, '.\\bin\\elevate.exe');
         this.binary = null;
     }
 
@@ -425,19 +425,14 @@ class SudoerWin32 extends Sudoer {
             () => {
                 let stream = createReadStream(
                     cp.files.output,
-                    {start: watcher.last},
                     ),
                     size = 0;
                 stream.on('data', (data) => {
                     size += data.length;
-                    if (cp) {
-                        cp.stdout.emit('data', data);
-                    }
                 });
                 stream.on('close', () => {
                     cp.last += size;
                 });
-            },
         );
         cp.last = output.length;
         cp.on('exit', () => {
@@ -455,9 +450,14 @@ class SudoerWin32 extends Sudoer {
             // Copy applet to temporary directory
             let target = join(this.tmpdir, 'elevate.exe');
             if (!(await stat(target))) {
+                let readStream = createReadStream(self.bundled);
                 let copied = createWriteStream(target);
+<<<<<<< HEAD
                 createReadStream(self.bundled).
                     pipe(copied);
+=======
+                readStream.pipe(copied);
+>>>>>>> Corrected elevate.exe path relative to dist folder
                 copied.on('close', () => {
                     self.binary = target;
                     return resolve(self.binary);
