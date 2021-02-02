@@ -420,6 +420,7 @@ class SudoerWin32 extends Sudoer {
             output = await readFile(cp.files.output);
         // If we have process then emit watched and stored data to stdout
         cp.stdout.emit('data', output);
+        // eslint-disable-next-line no-unused-vars
         let watcher = watchFile(
             cp.files.output, {persistent: true, interval: 1},
             () => {
@@ -433,6 +434,7 @@ class SudoerWin32 extends Sudoer {
                 stream.on('close', () => {
                     cp.last += size;
                 });
+            }
         );
         cp.last = output.length;
         cp.on('exit', () => {
@@ -450,14 +452,7 @@ class SudoerWin32 extends Sudoer {
             // Copy applet to temporary directory
             let target = join(this.tmpdir, 'elevate.exe');
             if (!(await stat(target))) {
-                let readStream = createReadStream(self.bundled);
                 let copied = createWriteStream(target);
-<<<<<<< HEAD
-                createReadStream(self.bundled).
-                    pipe(copied);
-=======
-                readStream.pipe(copied);
->>>>>>> Corrected elevate.exe path relative to dist folder
                 copied.on('close', () => {
                     self.binary = target;
                     return resolve(self.binary);
