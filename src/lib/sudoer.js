@@ -1,12 +1,17 @@
 import {tmpdir} from 'os';
-import {watchFile, unwatchFile, unlink, createReadStream, createWriteStream} from 'fs';
+import {
+    watchFile,
+    unwatchFile,
+    unlink,
+    createReadStream,
+    createWriteStream,
+} from 'fs';
 import {normalize, join, dirname} from 'path';
 import {createHash} from 'crypto';
 
 import {readFile, writeFile, exec, spawn, mkdir, stat} from '~/lib/utils';
 
 let {platform, env} = process;
-
 
 class Sudoer {
 
@@ -22,7 +27,8 @@ class Sudoer {
         hash.update('electron-sudo');
         hash.update(this.options.name || '');
         hash.update(buffer || new Buffer(0));
-        return hash.digest('hex').slice(-32);
+        return hash.digest('hex').
+            slice(-32);
     }
 
     joinEnv(options) {
@@ -53,12 +59,13 @@ class Sudoer {
     }
 }
 
-
 class SudoerUnix extends Sudoer {
 
-    constructor(options={}) {
+    constructor(options = {}) {
         super(options);
-        if (!this.options.name) { this.options.name = 'Electron'; }
+        if (!this.options.name) {
+            this.options.name = 'Electron';
+        }
     }
 
     async copy(source, target) {
@@ -66,10 +73,10 @@ class SudoerUnix extends Sudoer {
             source = this.escapeDoubleQuotes(normalize(source));
             target = this.escapeDoubleQuotes(normalize(target));
             try {
-                let result = await exec(`/bin/cp -R -p "${source}" "${target}"`);
+                let result = await exec(
+                    `/bin/cp -R -p "${source}" "${target}"`);
                 resolve(result);
-            }
-            catch (err) {
+            } catch (err) {
                 reject(err);
             }
         });
@@ -85,8 +92,7 @@ class SudoerUnix extends Sudoer {
             try {
                 let result = await exec(`rm -rf "${target}"`);
                 resolve(result);
-            }
-            catch (err) {
+            } catch (err) {
                 reject(err);
             }
         });
@@ -97,21 +103,22 @@ class SudoerUnix extends Sudoer {
     }
 }
 
-
 class SudoerDarwin extends SudoerUnix {
 
-    constructor(options={}) {
+    constructor(options = {}) {
         super(options);
         if (options.icns && typeof options.icns !== 'string') {
             throw new Error('options.icns must be a string if provided.');
         } else if (options.icns && options.icns.trim().length === 0) {
-            throw new Error('options.icns must be a non-empty string if provided.');
+            throw new Error(
+                'options.icns must be a non-empty string if provided.');
         }
         this.up = false;
     }
 
     isValidName(name) {
-        return /^[a-z0-9 ]+$/i.test(name) && name.trim().length > 0 && name.length < 70;
+        return /^[a-z0-9 ]+$/i.test(name) && name.trim().length > 0 &&
+            name.length < 70;
     }
 
     joinEnv(options) {
@@ -125,11 +132,15 @@ class SudoerDarwin extends SudoerUnix {
         return spreaded;
     }
 
-    async exec(command, options={}) {
+    async exec(command, options = {}) {
         return new Promise(async (resolve, reject) => {
             let self = this,
                 env = self.joinEnv(options),
-                sudoCommand = ['/usr/bin/sudo -n', env.join(' '), '-s', command].join(' '),
+                sudoCommand = [
+                    '/usr/bin/sudo -n',
+                    env.join(' '),
+                    '-s',
+                    command].join(' '),
                 result;
             await self.reset();
             try {
@@ -149,7 +160,7 @@ class SudoerDarwin extends SudoerUnix {
         });
     }
 
-    async spawn(command, args, options={}) {
+    async spawn(command, args, options = {}) {
         return new Promise(async (resolve, reject) => {
             let self = this,
                 bin = '/usr/bin/sudo',
@@ -157,7 +168,8 @@ class SudoerDarwin extends SudoerUnix {
             await self.reset();
             // Prompt password
             await self.prompt();
-            cp = spawn(bin, ['-n', '-s', '-E', [command, ...args].join(' ')], options);
+            cp = spawn(bin, ['-n', '-s', '-E', [command, ...args].join(' ')],
+                options);
             cp.on('error', async (err) => {
                 reject(err);
             });
@@ -171,12 +183,12 @@ class SudoerDarwin extends SudoerUnix {
         return new Promise(async (resolve, reject) => {
             if (!self.tmpdir) {
                 return reject(
-                    new Error('Requires os.tmpdir() to be defined.')
+                    new Error('Requires os.tmpdir() to be defined.'),
                 );
             }
             if (!env.USER) {
                 return reject(
-                    new Error('Requires env[\'USER\'] to be defined.')
+                    new Error('Requires env[\'USER\'] to be defined.'),
                 );
             }
             // Keep prompt in single instance
@@ -190,7 +202,9 @@ class SudoerDarwin extends SudoerUnix {
             try {
                 await mkdir(dirname(target));
             } catch (err) {
-                if (err.code !== 'EEXIST') { return reject(err); }
+                if (err.code !== 'EEXIST') {
+                    return reject(err);
+                }
             }
             try {
                 // Copy application to temporary directory
@@ -213,10 +227,12 @@ class SudoerDarwin extends SudoerUnix {
     async icon(target) {
         let self = this;
         return new Promise(async (resolve, reject) => {
-            if (!this.options.icns) { return resolve(); }
+            if (!this.options.icns) {
+                return resolve();
+            }
             let result = await self.copy(
                 this.options.icns,
-                join(target, 'Contents', 'Resources', 'applet.icns')
+                join(target, 'Contents', 'Resources', 'applet.icns'),
             );
             return resolve(result);
         });
@@ -253,13 +269,16 @@ class SudoerDarwin extends SudoerUnix {
     async propertyList(target) {
         let self = this;
         return new Promise(async (resolve, reject) => {
-            let path = self.escapeDoubleQuotes(join(target, 'Contents', 'Info.plist')),
+            let path = self.escapeDoubleQuotes(
+                join(target, 'Contents', 'Info.plist')),
                 key = self.escapeDoubleQuotes('CFBundleName'),
                 value = `${self.options.name} Password Prompt`;
             if (/'/.test(value)) {
-                return reject(new Error('Value should not contain single quotes.'));
+                return reject(
+                    new Error('Value should not contain single quotes.'));
             }
-            let result = await exec(`defaults write "${path}" "${key}" '${value}'`);
+            let result = await exec(
+                `defaults write "${path}" "${key}" '${value}'`);
             return resolve(result);
         });
     }
@@ -267,14 +286,14 @@ class SudoerDarwin extends SudoerUnix {
 
 class SudoerLinux extends SudoerUnix {
 
-    constructor(options={}) {
+    constructor(options = {}) {
         super(options);
         this.binary = null;
         // We prefer gksudo over pkexec since it gives a nicer prompt:
         this.paths = [
             '/usr/bin/gksudo',
             '/usr/bin/pkexec',
-            './bin/gksudo'
+            './bin/gksudo',
         ];
     }
 
@@ -282,22 +301,29 @@ class SudoerLinux extends SudoerUnix {
         return (await Promise.all(
             this.paths.map(async (path) => {
                 try {
-                    path = await stat(path);
-                    return path;
+                    let result = await stat(path);
+                    if (result) {
+                        return path;
+                    } else {
+                        return null;
+                    }
                 } catch (err) {
                     return null;
                 }
-            })
+            }),
         )).filter((v) => v)[0];
     }
 
-    async exec(command, options={}) {
+    async exec(command, options = {}) {
         return new Promise(async (resolve, reject) => {
             let self = this,
                 result;
             /* Detect utility for sudo mode */
             if (!self.binary) {
                 self.binary = await self.getBinary();
+            }
+            if (!options.env) {
+                options.env = process.env;
             }
             if (options.env instanceof Object && !options.env.DISPLAY) {
                 // Force DISPLAY variable with default value which is required for UI dialog
@@ -306,7 +332,8 @@ class SudoerLinux extends SudoerUnix {
             let flags;
             if (/gksudo/i.test(self.binary)) {
                 flags = '--preserve-env --sudo-mode ' +
-                    `--description="${self.escapeDoubleQuotes(self.options.name)}"`;
+                    `--description="${self.escapeDoubleQuotes(
+                        self.options.name)}"`;
             } else if (/pkexec/i.test(self.binary)) {
                 flags = '--disable-internal-agent';
             }
@@ -320,12 +347,15 @@ class SudoerLinux extends SudoerUnix {
         });
     }
 
-    async spawn(command, args, options={}) {
+    async spawn(command, args, options = {}) {
         let self = this;
         return new Promise(async (resolve, reject) => {
             /* Detect utility for sudo mode */
             if (!self.binary) {
                 self.binary = await self.getBinary();
+            }
+            if (!options.env) {
+                options.env = process.env;
             }
             if (options.env instanceof Object && !options.env.DISPLAY) {
                 // Force DISPLAY variable with default value which is required for UI dialog
@@ -337,7 +367,8 @@ class SudoerLinux extends SudoerUnix {
             if (/gksudo/i.test(self.binary)) {
                 sudoArgs.push('--preserve-env');
                 sudoArgs.push('--sudo-mode');
-                sudoArgs.push(`--description="${self.escapeDoubleQuotes(self.options.name)}"`);
+                sudoArgs.push(`--description="${self.escapeDoubleQuotes(
+                    self.options.name)}"`);
                 sudoArgs.push('--sudo-mode');
             } else if (/pkexec/i.test(self.binary)) {
                 sudoArgs.push('--disable-internal-agent');
@@ -356,16 +387,15 @@ class SudoerLinux extends SudoerUnix {
 
 class SudoerWin32 extends Sudoer {
 
-    constructor(options={}) {
+    constructor(options = {}) {
         super(options);
         this.bundled = 'src\\bin\\elevate.exe';
         this.binary = null;
     }
 
     async writeBatch(command, args, options) {
-        let tmpDir = (await exec('echo %temp%'))
-                .stdout.toString()
-                .replace(/\r\n$/, ''),
+        let tmpDir = (await exec('echo %temp%')).stdout.toString().
+                replace(/\r\n$/, ''),
             tmpBatchFile = `${tmpDir}\\batch-${Math.random()}.bat`,
             tmpOutputFile = `${tmpDir}\\output-${Math.random()}`,
             env = this.joinEnv(options),
@@ -381,7 +411,7 @@ class SudoerWin32 extends Sudoer {
         await writeFile(tmpBatchFile, `${batch} > ${tmpOutputFile} 2>&1`);
         await writeFile(tmpOutputFile, '');
         return {
-            batch: tmpBatchFile, output: tmpOutputFile
+            batch: tmpBatchFile, output: tmpOutputFile,
         };
     }
 
@@ -391,22 +421,24 @@ class SudoerWin32 extends Sudoer {
         // If we have process then emit watched and stored data to stdout
         cp.stdout.emit('data', output);
         let watcher = watchFile(
-                cp.files.output, {persistent: true, interval: 1},
-                () => {
-                    let stream = createReadStream(
-                            cp.files.output,
-                            {start: watcher.last}
-                        ),
-                        size = 0;
-                    stream.on('data', (data) => {
-                        size += data.length;
-                        if (cp) { cp.stdout.emit('data', data); }
-                    });
-                    stream.on('close', () => {
-                        cp.last += size;
-                    });
-                }
-            );
+            cp.files.output, {persistent: true, interval: 1},
+            () => {
+                let stream = createReadStream(
+                    cp.files.output,
+                    {start: watcher.last},
+                    ),
+                    size = 0;
+                stream.on('data', (data) => {
+                    size += data.length;
+                    if (cp) {
+                        cp.stdout.emit('data', data);
+                    }
+                });
+                stream.on('close', () => {
+                    cp.last += size;
+                });
+            },
+        );
         cp.last = output.length;
         cp.on('exit', () => {
             self.clean(cp);
@@ -417,12 +449,15 @@ class SudoerWin32 extends Sudoer {
     async prepare() {
         let self = this;
         return new Promise(async (resolve, reject) => {
-            if (self.binary) { return resolve(self.binary); }
+            if (self.binary) {
+                return resolve(self.binary);
+            }
             // Copy applet to temporary directory
             let target = join(this.tmpdir, 'elevate.exe');
             if (!(await stat(target))) {
                 let copied = createWriteStream(target);
-                createReadStream(self.bundled).pipe(copied);
+                createReadStream(self.bundled).
+                    pipe(copied);
                 copied.on('close', () => {
                     self.binary = target;
                     return resolve(self.binary);
@@ -437,13 +472,14 @@ class SudoerWin32 extends Sudoer {
         });
     }
 
-    async exec(command, options={}) {
+    async exec(command, options = {}) {
         let self = this, files, output;
         return new Promise(async (resolve, reject) => {
             try {
                 await this.prepare();
                 files = await self.writeBatch(command, [], options);
-                command = `${self.encloseDoubleQuotes(self.binary)} -wait ${files.batch}`;
+                command = `${self.encloseDoubleQuotes(
+                    self.binary)} -wait ${files.batch}`;
                 // No need to wait exec output because output is redirected to temporary file
                 await exec(command, options);
                 // Read entire output from redirected file on process exit
@@ -455,7 +491,7 @@ class SudoerWin32 extends Sudoer {
         });
     }
 
-    async spawn(command, args, options={}) {
+    async spawn(command, args, options = {}) {
         let files = await this.writeBatch(command, args, options),
             sudoArgs = [],
             cp;
@@ -468,12 +504,11 @@ class SudoerWin32 extends Sudoer {
         return cp;
     }
 
-    clean (cp) {
+    clean(cp) {
         unwatchFile(cp.files.output);
         unlink(cp.files.batch);
         unlink(cp.files.output);
     }
 }
-
 
 export {SudoerDarwin, SudoerLinux, SudoerWin32};
