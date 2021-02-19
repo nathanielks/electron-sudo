@@ -1,13 +1,14 @@
 {
   "name": "@peterupton/electron-sudo",
-  "version": "4.0.13",
+  "version": "4.0.14",
   "description": "Electron subprocess with administrative privileges, prompting the user with an OS dialog if necessary.",
   "main": "./dist/index.js",
+  "maintainers": ["Peter Upton"],
   "author": "Aleksandr Komlev",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git@github.com:automation-stack/electron-sudo.git"
+    "url": "git@github.com:peterupton/electron-sudo.git"
   },
   "keywords": [
     "sudo",
