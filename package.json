@@ -1,14 +1,14 @@
 {
-  "name": "@peterupton/electron-sudo",
+  "name": "@nathanielks/electron-sudo",
   "version": "4.0.14",
   "description": "Electron subprocess with administrative privileges, prompting the user with an OS dialog if necessary.",
   "main": "./dist/index.js",
-  "maintainers": ["Peter Upton"],
+  "maintainers": ["Nathaniel Schweinberg"],
   "author": "Aleksandr Komlev",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git@github.com:peterupton/electron-sudo.git"
+    "url": "git@github.com:nathanielks/electron-sudo.git"
   },
   "keywords": [
     "sudo",
@@ -26,9 +26,9 @@
     "subprocess"
   ],
   "bugs": {
-    "url": "https://github.com/peterupton/electron-sudo/issues"
+    "url": "https://github.com/nathanielks/electron-sudo/issues"
   },
-  "homepage": "https://github.com/peterupton/electron-sudo#readme",
+  "homepage": "https://github.com/nathanielks/electron-sudo#readme",
   "scripts": {
     "build": "node node_modules/webpack/bin/webpack.js --config ./webpack/config.babel.js",
     "build-win32": "node node_modules\\webpack\\bin\\webpack.js --config webpack\\config.babel.js",
