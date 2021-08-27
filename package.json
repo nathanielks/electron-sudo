@@ -33,6 +33,7 @@
     "build": "node node_modules/webpack/bin/webpack.js --config ./webpack/config.babel.js",
     "build-win32": "node node_modules\\webpack\\bin\\webpack.js --config webpack\\config.babel.js",
     "lint": "node_modules/eslint/bin/eslint.js -c .eslintrc ./src",
+    "prepublishOnly": "npm run build",
     "test-win32": "npm run build-win32 && node node_modules\\mocha\\bin\\mocha --compilers js:babel-core/register tests",
     "test": "npm run build && node node_modules/mocha/bin/mocha --compilers js:babel-core/register ./tests"
   },
