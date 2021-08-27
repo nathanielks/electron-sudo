@@ -1,9 +1,11 @@
 {
   "name": "@nathanielks/electron-sudo",
-  "version": "4.0.14",
+  "version": "4.0.15",
   "description": "Electron subprocess with administrative privileges, prompting the user with an OS dialog if necessary.",
   "main": "./dist/index.js",
-  "maintainers": ["Nathaniel Schweinberg"],
+  "maintainers": [
+    "Nathaniel Schweinberg"
+  ],
   "author": "Aleksandr Komlev",
   "license": "MIT",
   "repository": {
