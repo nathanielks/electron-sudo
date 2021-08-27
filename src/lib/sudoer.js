@@ -20,7 +20,7 @@ class Sudoer {
         let hash = createHash('sha256');
         hash.update('electron-sudo');
         hash.update(this.options.name || '');
-        hash.update(buffer || new Buffer(0));
+        hash.update(buffer || Buffer.alloc(0));
         return hash.digest('hex').
             slice(-32);
     }
@@ -249,7 +249,7 @@ class SudoerDarwin extends SudoerUnix {
         return new Promise(async (resolve, reject) => {
             // ICNS is supported only on Mac.
             if (!icnsPath || platform !== 'darwin') {
-                return resolve(new Buffer(0));
+                return resolve(Buffer.alloc(0));
             }
             try {
                 let data = await readFile(icnsPath);
